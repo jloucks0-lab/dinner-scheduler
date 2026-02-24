@@ -1,0 +1,27 @@
+# railway.toml
+# 
+# Railway deployment configuration for the Dinner Scheduler.
+# This defines the cron schedule that triggers the script automatically.
+#
+# Cron expression: "0 9 28-31 * *"
+#   ┌──────────── minute (0)
+#   │  ┌─────────── hour (9 = 9:00 AM UTC = 4:00 AM EST)  
+#   │  │  ┌──────── day of month (28-31 = last days of month)
+#   │  │  │     ┌── month (every month)
+#   │  │  │     │  ┌─ day of week (* = any)
+#   │  │  │     │  │
+#   0  9  28-31 *  *
+#
+# Since months have different lengths, running on days 28-31 means it will 
+# fire multiple times on short months. We handle this in the script by
+# checking if today is the actual last day of the month.
+
+[build]
+builder = "NIXPACKS"
+
+[[services]]
+name = "dinner-scheduler"
+
+[services.cron]
+schedule = "0 9 28-31 * *"
+command = "node src/index.js"
