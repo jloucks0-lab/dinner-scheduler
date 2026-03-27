@@ -1,0 +1,38 @@
+name: Dinner Scheduler
+
+on:
+  schedule:
+    # Runs at 9:00 AM UTC (5:00 AM EST) on the last day of every month
+    # GitHub Actions doesn't support "last day of month" natively, so we
+    # run on days 28-31 and let the script's isLastDayOfMonth() guard handle it
+    - cron: '0 9 28-31 * *'
+
+  # Allows you to trigger a manual run from the GitHub Actions tab
+  workflow_dispatch:
+
+jobs:
+  schedule-dinners:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run dinner scheduler
+        env:
+          CALENDAR_ID: ${{ secrets.CALENDAR_ID }}
+          GOOGLE_PROJECT_ID: ${{ secrets.GOOGLE_PROJECT_ID }}
+          GOOGLE_PRIVATE_KEY_ID: ${{ secrets.GOOGLE_PRIVATE_KEY_ID }}
+          GOOGLE_PRIVATE_KEY: ${{ secrets.GOOGLE_PRIVATE_KEY }}
+          GOOGLE_CLIENT_EMAIL: ${{ secrets.GOOGLE_CLIENT_EMAIL }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+        run: node src/index.js
