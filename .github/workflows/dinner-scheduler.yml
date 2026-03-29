@@ -2,12 +2,7 @@ name: Dinner Scheduler
 
 on:
   schedule:
-    # Runs at 9:00 AM UTC (5:00 AM EST) on the last day of every month
-    # GitHub Actions doesn't support "last day of month" natively, so we
-    # run on days 28-31 and let the script's isLastDayOfMonth() guard handle it
     - cron: '0 9 28-31 * *'
-
-  # Allows you to trigger a manual run from the GitHub Actions tab
   workflow_dispatch:
 
 jobs:
