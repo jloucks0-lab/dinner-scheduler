@@ -1,16 +1,9 @@
 /**
  * calendar.js
- * 
- * Google Calendar API helper.
- * Handles OAuth2 authentication via a Service Account and creates dinner events.
  */
 
 const { google } = require("googleapis");
 
-/**
- * Build an authenticated Google Calendar client using a Service Account.
- * The service account JSON credentials are passed in via environment variables.
- */
 function getCalendarClient() {
   const credentials = {
     type: "service_account",
@@ -31,22 +24,19 @@ function getCalendarClient() {
   return google.calendar({ version: "v3", auth });
 }
 
-/**
- * Format a recipe into a rich, readable calendar event description.
- */
 function formatEventDescription(recipe, theme) {
   const themeEmoji = {
-    chicken:   "🍗",
-    mexican:   "🌮",
+    chicken: "🍗",
+    mexican: "🌮",
     casserole: "🍝",
-    crockpot:  "🥘",
+    crockpot: "🥘",
   };
 
   const themeTitle = {
-    chicken:   "MONDAY CHICKEN NIGHT",
-    mexican:   "TUESDAY MEXICAN NIGHT",
+    chicken: "MONDAY CHICKEN NIGHT",
+    mexican: "TUESDAY MEXICAN NIGHT",
     casserole: "WEDNESDAY CASSEROLE & PASTA NIGHT",
-    crockpot:  "THURSDAY CROCKPOT NIGHT",
+    crockpot: "THURSDAY CROCKPOT NIGHT",
   };
 
   const emoji = themeEmoji[theme] || "🍽️";
@@ -75,88 +65,32 @@ function formatEventDescription(recipe, theme) {
   return description;
 }
 
-/**
- * Format the event title with emoji.
- */
 function formatEventTitle(recipe, theme) {
   const emoji = {
-    chicken:   "🍗",
-    mexican:   "🌮",
+    chicken: "🍗",
+    mexican: "🌮",
     casserole: "🍝",
-    crockpot:  "🥘",
+    crockpot: "🥘",
   };
 
   const label = {
-    chicken:   "Monday Chicken Night",
-    mexican:   "Tuesday Mexican Night",
+    chicken: "Monday Chicken Night",
+    mexican: "Tuesday Mexican Night",
     casserole: "Wednesday Casserole & Pasta Night",
-    crockpot:  "Thursday Crockpot Night",
+    crockpot: "Thursday Crockpot Night",
   };
 
   return `${emoji[theme] || "🍽️"} ${label[theme]} — ${recipe.name}`;
 }
 
-/**
- * Create a single Google Calendar dinner event.
- *
- * @param {object} calendar  - Authenticated Google Calendar client
- * @param {object} recipe    - Recipe object from recipes.js
- * @param {string} theme     - 'chicken' | 'mexican' | 'casserole' | 'crockpot'
- * @param {Date}   date      - JS Date object for the event date
- * @param {string} calendarId - Target Google Calendar ID (email address)
- */
 async function createDinnerEvent(calendar, recipe, theme, date, calendarId) {
-  // Crockpot events start at 5:00 PM (need to arrive home and prep sides)
-  // All other dinners start at 6:00 PM
-  const startHour = theme === "crockpot" ? 17 : 18;
-  const durationMinutes = theme === "crockpot" ? 90 : 60;
-
+  // All events: 8:00 AM - 9:00 AM
   const startDate = new Date(date);
-  startDate.setHours(startHour, 0, 0, 0);
+  startDate.setHours(8, 0, 0, 0);
 
-  const endDate = new Date(startDate);
-  endDate.setMinutes(endDate.getMinutes() + durationMinutes);
-
-  // Format as ISO strings with timezone offset
-  const tzOffset = -5; // EST (UTC-5). Adjust if needed: -4 for EDT
-  const formatISO = (d) => {
-    const offset = tzOffset * 60;
-    const localDate = new Date(d.getTime() - offset * 60 * 1000);
-    return localDate.toISOString().replace("Z", `${tzOffset < 0 ? "-" : "+"}${String(Math.abs(tzOffset)).padStart(2, "0")}:00`);
-  };
+  const endDate = new Date(date);
+  endDate.setHours(9, 0, 0, 0);
 
   const event = {
     summary: formatEventTitle(recipe, theme),
-    description: formatEventDescription(recipe, theme),
-    start: {
-      dateTime: formatISO(startDate),
-      timeZone: "America/New_York",
-    },
-    end: {
-      dateTime: formatISO(endDate),
-      timeZone: "America/New_York",
-    },
-    reminders: {
-      useDefault: false,
-      overrides: [
-        { method: "popup", minutes: 60 },   // 1 hr before: reminder to start cooking
-        { method: "popup", minutes: 480 },  // 8 hrs before: crockpot reminder (morning)
-      ],
-    },
-    colorId: {
-      chicken:   "6",  // Tangerine (orange)
-      mexican:   "2",  // Sage (green)
-      casserole: "9",  // Blueberry
-      crockpot:  "4",  // Flamingo (pink)
-    }[theme] || "1",
-  };
-
-  const response = await calendar.events.insert({
-    calendarId,
-    resource: event,
-  });
-
-  return response.data;
-}
-
-module.exports = { getCalendarClient, createDinnerEvent };
+    descr
